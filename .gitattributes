@@ -1,0 +1,55 @@
+# Normalize text files to LF in repo; Windows clients will still get CRLF if core.autocrlf=true
+* text=auto eol=lf
+
+# Common text files that must be LF
+*.sh   text eol=lf
+*.bash text eol=lf
+*.zsh  text eol=lf
+*.py   text eol=lf
+*.rb   text eol=lf
+*.js   text eol=lf
+*.ts   text eol=lf
+*.jsx  text eol=lf
+*.tsx  text eol=lf
+*.css  text eol=lf
+*.scss text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.ini  text eol=lf
+*.cfg  text eol=lf
+*.xml  text eol=lf
+*.html text eol=lf
+*.sql  text eol=lf
+
+# Windows-specific scripts
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Binary files (no EOL conversion)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.bmp  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.gz   binary
+*.7z   binary
+*.tar  binary
+*.rar  binary
+*.jar  binary
+*.exe  binary
+*.dll  binary
+*.so   binary
+*.dylib binary
+*.bin  binary
+*.mp3  binary
+*.mp4  binary
+*.mov  binary
+*.avi  binary
