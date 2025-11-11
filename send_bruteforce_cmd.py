@@ -84,13 +84,14 @@ def post_local_message(ip: str, payload: Dict[str, Any], timeout: float = 5.0) -
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Bruteforce last byte XX with fixed cmd=0x02: send 8-byte AEHA-like frames via Local API /messages")
+    ap = argparse.ArgumentParser(description="Bruteforce last byte XX with selectable cmd (default 0x02): send 8-byte AEHA-like frames via Local API /messages")
     ap.add_argument("--file", default="dump-results.txt", help="Sample file to estimate unit_us from (default: dump-results.txt)")
     ap.add_argument("--ip", help="Nature Remo local IP; fallback to env NATURE_REMO_LOCAL_IP_ADDRESS or REMO_IP")
     ap.add_argument("--sleep", type=float, default=2.0, help="Seconds to sleep between sends (default: 2.0)")
     ap.add_argument("--start", type=lambda s: int(s, 0), default=0, help="Start value of XX (0-255, accepts hex e.g. 0x00)")
     ap.add_argument("--end", type=lambda s: int(s, 0), default=255, help="End value of XX (0-255, accepts hex e.g. 0xFF)")
     ap.add_argument("--freq", type=int, default=38, help="Carrier freq kHz (default: 38)")
+    ap.add_argument("--cmd", type=lambda s: int(s,0), default=0x02, help="Command byte (hex). Known: 0x02=風量 0x03=首振り 0x04=オフタイマー")
     ap.add_argument("--verbose", action="store_true", help="Verbose output")
     args = ap.parse_args()
 
@@ -106,7 +107,7 @@ def main() -> int:
 
     # Fixed header bytes from observed frames (LSB-first decoded)
     header = [0x23, 0xCB, 0x16, 0x44, 0x80, 0x89]
-    cmd = 0x02  # as requested
+    cmd = args.cmd  # user-specified command byte
 
     # Iterate XX in range
     for xx in range(max(0, args.start), min(255, args.end) + 1):
