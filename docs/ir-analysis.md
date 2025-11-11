@@ -109,3 +109,8 @@ uv run python send_local_message_from_file.py dump-results.txt --line 1
 - `send_local_message_from_file.py`: 行からのJSON抽出と `/messages` 送信
 - `analyze_ir_dump.py`: AEHA系デコードと比較
 - `checksum_search.py`: 末尾バイト規則の探索
+
+### 追記: ブルートフォース検証メモ (2025-11-11)
+- `send_bruteforce_cmd.py` にて、ヘッダー `[0x23, 0xCB, 0x16, 0x44, 0x80, 0x89]`、`cmd=0x02` 固定で、末尾バイトを `0xA0`〜`0xAF` にした全てで風量切替が反応。
+- 含意: 末尾バイトは上位4ビットのみが検証対象で、`(cs & 0xF0) == 0x80 + (cmd << 4)` を満たせば下位4ビットは不問（ドントケア）と推定。
+- 運用推奨: `cs = 0x80 + (cmd << 4)` とし、下位4ビットは `0x0` を固定（例: `cmd=0x02 → cs=0xA0`）。
