@@ -91,7 +91,7 @@ def main() -> int:
     ap.add_argument("--start", type=lambda s: int(s, 0), default=0, help="Start value of XX (0-255, accepts hex e.g. 0x00)")
     ap.add_argument("--end", type=lambda s: int(s, 0), default=255, help="End value of XX (0-255, accepts hex e.g. 0xFF)")
     ap.add_argument("--freq", type=int, default=38, help="Carrier freq kHz (default: 38)")
-    ap.add_argument("--cmd", type=lambda s: int(s,0), default=0x02, help="Command byte (hex). Known: 0x02=風量 0x03=首振り 0x04=オフタイマー")
+    ap.add_argument("--cmd", type=lambda s: int(s,0), default=0x02, help="Command byte (hex). Known: 0x01=電源トグル 0x02=風量 0x03=首振り 0x04=オフタイマー")
     ap.add_argument("--verbose", action="store_true", help="Verbose output")
     args = ap.parse_args()
 
