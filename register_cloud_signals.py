@@ -32,13 +32,27 @@ def api_get(path: str, token: str) -> Any:
     return resp.json()
 
 
-def api_post(path: str, token: str, json_body: Optional[Dict[str, Any]] = None) -> Any:
+def api_post(
+    path: str,
+    token: str,
+    body: Optional[Dict[str, Any]] = None,
+    *,
+    as_form: bool = False,
+) -> Any:
+    kwargs: Dict[str, Any] = {"timeout": 15}
+    if as_form:
+        kwargs["data"] = body or {}
+    else:
+        kwargs["json"] = body
     resp = requests.post(
         f"{BASE}{path}",
         headers={"Authorization": f"Bearer {token}"},
-        json=json_body,
-        timeout=15,
+        **kwargs,
     )
+    if not resp.ok:
+        detail = resp.text.strip()
+        if detail:
+            print(f"Error response from {path}: {detail}", file=sys.stderr)
     resp.raise_for_status()
     return resp.json() if resp.text else {}
 
@@ -129,6 +143,9 @@ def main() -> int:
     parser.add_argument("--appliance-name", default="黒い扇風機", help="Appliance nickname to create/use.")
     parser.add_argument("--device-name", help="Optional device name to select from /devices.")
     parser.add_argument("--file", default="dump-results.txt", help="Sample file to estimate unit_us from.")
+    parser.add_argument("--type", default="IR", help="Appliance type for creation (default: IR).")
+    parser.add_argument("--model", default="", help="Optional appliance model for creation.")
+    parser.add_argument("--image", default="ico_fan", help="Appliance image key (default: ico_fan).")
     parser.add_argument("--dry-run", action="store_true", help="Print planned actions without POSTing.")
     args = parser.parse_args()
 
@@ -147,12 +164,19 @@ def main() -> int:
         ap_id = ap.get("id")
         print(f"Using existing appliance: {args.appliance_name} (id={ap_id})")
     else:
-        payload = {"device": device_id, "model": "IR", "nickname": args.appliance_name}
+        payload = {
+            "device": device_id,
+            "type": args.type,
+            "nickname": args.appliance_name,
+            "image": args.image,
+        }
+        if args.model:
+            payload["model"] = args.model
         if args.dry_run:
             print(f"[dry-run] would create appliance: {payload}")
             ap = {"id": "<dry-run-appliance-id>"}
         else:
-            ap = api_post("/appliances", token, payload)
+            ap = api_post("/appliances", token, payload, as_form=True)
         ap_id = ap.get("id")
         print(f"Created appliance: {args.appliance_name} (id={ap_id}) on device={device_name}")
 
@@ -168,20 +192,21 @@ def main() -> int:
     unit = estimate_unit_us_from_sample(args.file)
     header = [0x23, 0xCB, 0x16, 0x44, 0x80, 0x89]
     table = [
-        (0x01, 0x90, "電源"),
-        (0x02, 0xA0, "風量"),
-        (0x03, 0xB0, "首振り"),
-        (0x04, 0xC0, "オフタイマー"),
-        (0x0A, 0x20, "オンタイマー"),
+        (0x01, 0x90, "電源", "ico_io"),
+        (0x02, 0xA0, "風量", "ico_blast"),
+        (0x03, 0xB0, "首振り", "ico_mode_auto"),
+        (0x04, 0xC0, "オフタイマー", "ico_timer"),
+        (0x0A, 0x20, "オンタイマー", "ico_timer"),
     ]
 
-    for cmd, xx, name in table:
+    for cmd, xx, name, image in table:
         if name in existing_names:
             print(f"skip: signal already exists: {name}")
             continue
         data_bytes = header + [cmd, xx]
         payload = {
             "name": name,
+            "image": image,
             "message": json.dumps(
                 {"format": "us", "freq": 38, "data": encode_aeha_bytes_to_us(data_bytes, unit)},
                 separators=(",", ":"),
@@ -190,7 +215,7 @@ def main() -> int:
         if args.dry_run:
             print(f"[dry-run] would register signal: {name} cmd=0x{cmd:02X} xx=0x{xx:02X}")
             continue
-        created = api_post(f"/appliances/{ap_id}/signals", token, payload)
+        created = api_post(f"/appliances/{ap_id}/signals", token, payload, as_form=True)
         print(f"created signal: {created.get('name')} id={created.get('id')}")
 
     return 0
