@@ -119,3 +119,4 @@ uv run python send_local_message_from_file.py dump-results.txt --line 1
 - `cmd=0x01` で電源のオン/オフがトグル動作することを確認。
 - `xx=0x90`〜`0x9F` のいずれでも反応し、下位4ビットはドントケア。
 - 運用推奨: `cmd=0x01`、`cs = 0x90`（下位4ビットは `0x0` 固定）。
+- `cmd=0x0A` / `xx=0x20` でオンタイマーが反応することを確認。
