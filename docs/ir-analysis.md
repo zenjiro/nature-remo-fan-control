@@ -123,8 +123,8 @@ uv run python send_local_message_from_file.py dump-results.txt --line 1
 
 | cmd | xx | func |
 | --- | --- | --- |
-| 0x01 | 0x90 | 電源トグル（下位4ビットはドントケア） |
-| 0x02 | 0xA0 | 風量（下位4ビットはドントケア） |
+| 0x01 | 0x90 | 電源 |
+| 0x02 | 0xA0 | 風量 |
 | 0x03 | 0xB0 | 首振り |
 | 0x04 | 0xC0 | オフタイマー |
 | 0x0A | 0x20 | オンタイマー |
